@@ -18,6 +18,11 @@ when CLIENTSSL_HANDSHAKE {
 }
 
 when HTTP_REQUEST {
+    # Alleen controleren voor de juiste hostname
+    if { [HTTP::host] ne "test.sbd-it.nl" } {
+        return
+    }
+
     # Zoek eerste data group waarvan de key een prefix is van de URI
     set cert_dg [class match -value [HTTP::uri] starts_with url_to_certgroup_dg]
 
