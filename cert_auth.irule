@@ -1,0 +1,45 @@
+# ============================================================
+# cert_auth.irule
+# URL-gebaseerde client certificaat autorisatie
+# ============================================================
+
+when RULE_INIT {
+    # Logging aan (1) of uit (0)
+    set static::debug 1
+}
+
+when CLIENTSSL_HANDSHAKE {
+    set client_cn [X509::subject [SSL::cert 0] CN]
+    set client_sn [X509::serial  [SSL::cert 0]]
+
+    if { $static::debug } {
+        log local0. "CLIENTSSL - CN: $client_cn | SN: $client_sn | Client IP: [IP::client_addr]"
+    }
+}
+
+when HTTP_REQUEST {
+    # Zoek eerste data group waarvan de key een prefix is van de URI
+    set cert_dg [class match -value [HTTP::uri] starts_with url_to_certgroup_dg]
+
+    if { $cert_dg eq "" } {
+        if { $static::debug } {
+            log local0. "DENY - URL not configured | URI: [HTTP::uri] | CN: $client_cn | SN: $client_sn | Client IP: [IP::client_addr]"
+        }
+        HTTP::respond 403 content "Access Denied"
+        return
+    }
+
+    set allowed_cn [class match -value $client_sn equals $cert_dg]
+
+    if { $allowed_cn eq "" || ($allowed_cn ne "*" && $allowed_cn ne $client_cn) } {
+        if { $static::debug } {
+            log local0. "DENY - Cert mismatch | URI: [HTTP::uri] | CN: $client_cn | SN: $client_sn | Expected CN: $allowed_cn | Client IP: [IP::client_addr]"
+        }
+        HTTP::respond 403 content "Access Denied"
+        return
+    }
+
+    if { $static::debug } {
+        log local0. "ALLOW | URI: [HTTP::uri] | CN: $client_cn | SN: $client_sn | Client IP: [IP::client_addr]"
+    }
+}
