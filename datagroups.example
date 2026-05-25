@@ -1,0 +1,54 @@
+# ============================================================
+# datagroups.example
+# Voorbeeld configuratie voor de data groups behorend bij
+# cert_auth.irule
+# ============================================================
+
+
+# ------------------------------------------------------------
+# HOOFD DATA GROUP
+# Naam : url_to_certgroup_dg
+# Type : string
+#
+# Sleutel  = URL-prefix (starts_with matching)
+# Waarde   = naam van de bijbehorende cert data group
+# ------------------------------------------------------------
+
+"/api/orders"       := "certs_api_orders",
+"/api/invoices"     := "certs_api_invoices",
+"/api/products"     := "certs_api_products",
+"/admin"            := "certs_admin",
+"/internal/reports" := "certs_internal",
+
+
+# ------------------------------------------------------------
+# CERT DATA GROUP — certs_api_orders
+# Type : string
+#
+# Sleutel  = serienummer zoals X509::serial het teruggeeft
+#            (kleine letters, dubbele punten: aa:bb:cc:dd:ee:ff)
+# Waarde   = verwachte common name
+#            Gebruik * om alleen het serienummer te controleren
+#            en de CN te negeren
+# ------------------------------------------------------------
+
+"1a:2b:3c:4d:5e:6f"         := "orders-client-prod",
+"0f:1e:2d:3c:4b:5a"         := "orders-client-acc",
+"aa:bb:cc:dd:ee:ff"         := "*",
+
+
+# ------------------------------------------------------------
+# CERT DATA GROUP — certs_api_invoices
+# Type : string
+# ------------------------------------------------------------
+
+"11:22:33:44:55:66"         := "invoices-client-prod",
+"ff:ee:dd:cc:bb:aa"         := "invoices-client-acc",
+
+
+# ------------------------------------------------------------
+# CERT DATA GROUP — certs_admin
+# Type : string
+# ------------------------------------------------------------
+
+"de:ad:be:ef:12:34"         := "admin-beheerder",
